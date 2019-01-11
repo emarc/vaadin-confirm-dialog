@@ -12,6 +12,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
 <link rel="import" href="../../vaadin-license-checker/vaadin-license-checker.html">
 <link rel="import" href="../../vaadin-button/src/vaadin-button.html">
 <link rel="import" href="../../vaadin-dialog/src/vaadin-dialog.html">
+<link rel="import" href="../../vaadin-checkbox/src/vaadin-checkbox.html">
 
 <dom-module id="vaadin-confirm-dialog">
   <template>
@@ -22,7 +23,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
     </style>
     <vaadin-dialog
       id="dialog"
-      opened="{{opened}}"
+      opened="{{_dialogOpened}}"
       aria-label="[[_getAriaLabel(header)]]"
       no-close-on-outside-click
       no-close-on-esc="[[noCloseOnEsc]]">
@@ -44,6 +45,13 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
               <vaadin-button id="cancel" theme$="[[cancelTheme]]" on-click="_cancel" hidden$="[[!cancel]]" aria-describedby="message">
                 [[cancelText]]
               </vaadin-button>
+            </slot>
+          </div>
+          <div class="remember-checkbox">
+            <slot name="remember-checkbox">
+              <vaadin-checkbox id="remember" checked="{{remember}}" theme$="[[rememberTheme]]" hidden$="[[!rememberId]]" aria-describedby="message">
+                [[rememberText]]
+              </vaadin-checkbox>
             </slot>
           </div>
           <div class="reject-button">
@@ -209,8 +217,55 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
             },
             _confirmButton: {
               type: Element
+            },
+            remember: {
+              type: Boolean,
+              value: false
+            },
+            rememberId: {
+              type: String
+            },
+            _rememberIdPrefix: {
+              type: String,
+              value: 'vaadin.vaadin-confirm-dialog.choice.'
+            },
+            rememberText: {
+              type: String,
+              value: 'Don\'t ask me again'
+            },
+
+            _dialogOpened: {
+              type: Boolean,
+              value: false
             }
           };
+        }
+
+        _remember(choice) {
+          if (this.remember && this.rememberId) {
+            localStorage.setItem(this._rememberIdPrefix + this.rememberId, choice)
+          }
+        }
+
+        _recall() {
+          if (this.rememberId) {
+            var choice = localStorage.getItem(this._rememberIdPrefix + this.rememberId);
+            switch (choice) {
+              case '_confirm':
+              case '_reject':
+                this[choice].apply(this);
+                return true;
+              default:
+                console.warn("Invalid choice " + choice + " for dialog " + this.rememberId);
+            }
+          }
+          return false;
+        }
+
+        forget() {
+          if (this.rememberId) {
+            localStorage.removeItem(this._rememberIdPrefix + this.rememberId);
+          }
         }
 
         ready() {
@@ -219,9 +274,12 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
         }
 
         _openedChanged() {
-          if (!this.opened) {
+          if (!this.opened || this._recall()) {
+            this._dialogOpened = false;
             return;
           }
+
+          this._dialogOpened = true;
 
           Array.from(this.childNodes).forEach(c => {
             var newChild = this.$.dialog.$.overlay.$.content.appendChild(c);
@@ -247,6 +305,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
          * fired when Confirm button was pressed.
          */
         _confirm() {
+          this._remember('_confirm');
           this.dispatchEvent(new CustomEvent('confirm'));
           this.opened = false;
         }
@@ -265,6 +324,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
          * fired when Reject button was pressed.
          */
         _reject() {
+          this._remember('_reject');
           this.dispatchEvent(new CustomEvent('reject'));
           this.opened = false;
         }
