@@ -43,19 +43,19 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
         </div>
 
         <div part="footer">
-          <div class="cancel-button">
-            <slot name="cancel-button">
-              <vaadin-button id="cancel" theme$="[[cancelTheme]]" on-click="_cancel" hidden$="[[!cancel]]" aria-describedby="message">
-                [[cancelText]]
-              </vaadin-button>
-            </slot>
-          </div>
           <div class="remember-checkbox">
             <slot name="remember-checkbox">
               <vaadin-checkbox id="remember" checked="{{remember}}" theme$="[[rememberTheme]]" hidden$="[[!_showRemember]]" aria-describedby="message">
                 [[rememberText]]
               </vaadin-checkbox>
             </slot>
+          </div>
+          <div class="cancel-button">
+              <slot name="cancel-button">
+                <vaadin-button id="cancel" theme$="[[cancelTheme]]" on-click="_cancel" hidden$="[[!cancel]]" aria-describedby="message">
+                  [[cancelText]]
+                </vaadin-button>
+              </slot>
           </div>
           <div class="reject-button">
             <slot name="reject-button">
