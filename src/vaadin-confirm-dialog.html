@@ -20,6 +20,9 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
       :host {
         display: none;
       }
+      [part="footer"] vaadin-checkbox[hidden] {
+        display: none !important;
+      }
     </style>
     <vaadin-dialog
       id="dialog"
@@ -49,7 +52,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
           </div>
           <div class="remember-checkbox">
             <slot name="remember-checkbox">
-              <vaadin-checkbox id="remember" checked="{{remember}}" theme$="[[rememberTheme]]" hidden$="[[!rememberId]]" aria-describedby="message">
+              <vaadin-checkbox id="remember" checked="{{remember}}" theme$="[[rememberTheme]]" hidden$="[[!_showRemember]]" aria-describedby="message">
                 [[rememberText]]
               </vaadin-checkbox>
             </slot>
@@ -229,16 +232,23 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
               type: String,
               value: 'vaadin.vaadin-confirm-dialog.choice.'
             },
+            _showRemember: {
+              type: Boolean,
+              computed: '_canRemember()'
+            },
             rememberText: {
               type: String,
               value: 'Don\'t ask me again'
             },
-
             _dialogOpened: {
               type: Boolean,
               value: false
             }
           };
+        }
+
+        _canRemember() {
+          return !!this.rememberId;
         }
 
         _remember(choice) {
@@ -250,6 +260,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
         _recall() {
           if (this.rememberId) {
             var choice = localStorage.getItem(this._rememberIdPrefix + this.rememberId);
+            if (!choice) return false;
             switch (choice) {
               case '_confirm':
               case '_reject':
