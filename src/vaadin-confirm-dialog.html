@@ -265,12 +265,12 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
               case '_confirm':
               case '_reject':
                 this[choice].apply(this);
-                return true;
+                return choice;
               default:
                 console.warn("Invalid choice " + choice + " for dialog " + this.rememberId);
             }
           }
-          return false;
+          return null;
         }
 
         forget() {
@@ -285,7 +285,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
         }
 
         _openedChanged() {
-          if (!this.opened || this._recall()) {
+          if (!this.opened || !!this._recall()) {
             this._dialogOpened = false;
             return;
           }
