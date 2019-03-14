@@ -43,6 +43,7 @@
         flex-grow: 1;
         align-self: center;
         margin-left: calc(var(--lumo-space-s) * -1);
+        color: var(--lumo-secondary-text-color);
       }
 
       .cancel-button {
@@ -58,7 +59,7 @@
         margin-left: var(--lumo-space-s);
       }
 
-      @media (max-width: 360px) {
+      @media (max-width: 600px) {
         [part="footer"] {
           flex-direction: column-reverse;
         }
@@ -79,6 +80,10 @@
         }
 
         [part="footer"] .cancel-button {
+          margin-bottom: var(--lumo-space-s);
+        }
+
+        [part="footer"] .remember-checkbox {
           margin-bottom: var(--lumo-space-s);
         }
       }

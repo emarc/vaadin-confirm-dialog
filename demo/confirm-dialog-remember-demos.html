@@ -87,7 +87,7 @@
     <h3>Remember choice when using custom buttons</h3>
     <p>
       If your dialog has custom (slotted) buttons, you can make use of the built-in remember- functionality if
-      by calling the dialog <code>_confirm()</code> and <code>_reject()</code> functions. 
+      by calling the dialog <code>doConfirm()</code> and <code>doReject()</code> functions. 
     </p>
     <vaadin-demo-snippet id="confirm-dialog-remember-demos-custom-buttons">
         <template preserve-content>
@@ -111,7 +111,7 @@
 
               var save = document.querySelector('#save');
               save.addEventListener('click', function() {
-                dialog._confirm();
+                dialog.doConfirm();
               });
 
               var count = 1;
@@ -137,46 +137,34 @@
 
     <h3>Reset choices</h3>
     <p>
-      The user might need to reset their choice. One way to do this is to provide an interface where the user can see 
-      and reset, all the remembered chices.
+      The user should be able to reset their remembered choice; you can remove individual keys 
+      by doing calling <code>forget()</code> on the dialog, or by calling 
+      <code>localStorage.removeItem()</code> directly.<br/>
+      You can also enumerate all the remembered choices and allow the user to reset each one.
+      A simple component for doing this is provided:
     </p>
     <vaadin-demo-snippet id="confirm-dialog-remember-demos-reset">
       <template preserve-content>
-        <vaadin-confirm-dialog></vaadin-confirm-dialog>
-
-        <vaadin-button id="list">List remembered choices</vaadin-button>
+        <vaadin-confirm-dialog-choice-list 
+          id="list"
+          descriptions='{"send": {"title": "Send email", "description":"Confirm sending email","reject":"Discard", "confirm":"Send"}}'>
+          <b>Nothing remembered</b>
+        </vaadin-confirm-dialog-choice-list>
+        <vaadin-button id="refresh">Refresh</vaadin-button>
         <vaadin-button id="forget">Forget all</vaadin-button>
-        <pre><code id="status"></code></pre>
         <script>
           window.addDemoReadyListener('#confirm-dialog-remember-demos-reset', function(document) {
             var dialog = document.querySelector('vaadin-confirm-dialog');
             var list = document.querySelector('#list');
+            var refresh = document.querySelector('#refresh');
             var forget = document.querySelector('#forget');
-            var status = document.querySelector('#status');
 
-            list.addEventListener('click', function() {
-              var res = '';
-              for ( var i = 0, len = localStorage.length; i < len; ++i ) {
-                var key =  localStorage.key(i);
-                if (key.startsWith(dialog._rememberIdPrefix)) {
-                  res += key.replace(dialog._rememberIdPrefix, '') + ' = ' + localStorage.getItem(key) + '\n';
-                }
-              }
-              status.innerText = res;
+            refresh.addEventListener('click', function() {
+              list.refresh();
             });
 
             forget.addEventListener('click', function() {
-              var keys = [];
-              for ( var i = 0, len = localStorage.length; i < len; ++i ) {
-                var key =  localStorage.key(i);
-                if (key.startsWith(dialog._rememberIdPrefix)) {
-                  keys.push(key);
-                }
-              }
-              keys.forEach(key => {
-                localStorage.removeItem(key);
-              });
-              status.innerText = keys.length + ' choices forgotten.';
+              list.forgetAll();
             });
           });
         </script>

@@ -20,9 +20,6 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
       :host {
         display: none;
       }
-      [part="footer"] vaadin-checkbox[hidden] {
-        display: none !important;
-      }
     </style>
     <vaadin-dialog
       id="dialog"
@@ -52,21 +49,21 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
           </div>
           <div class="cancel-button">
               <slot name="cancel-button">
-                <vaadin-button id="cancel" theme$="[[cancelTheme]]" on-click="_cancel" hidden$="[[!cancel]]" aria-describedby="message">
+                <vaadin-button id="cancel" theme$="[[cancelTheme]]" on-click="doCancel" hidden$="[[!cancel]]" aria-describedby="message">
                   [[cancelText]]
                 </vaadin-button>
               </slot>
           </div>
           <div class="reject-button">
             <slot name="reject-button">
-              <vaadin-button id="reject" theme$="[[rejectTheme]]" on-click="_reject" hidden$="[[!reject]]" aria-describedby="message">
+              <vaadin-button id="reject" theme$="[[rejectTheme]]" on-click="doReject" hidden$="[[!reject]]" aria-describedby="message">
                 [[rejectText]]
               </vaadin-button>
             </slot>
           </div>
           <div class="confirm-button">
             <slot name="confirm-button">
-              <vaadin-button id="confirm" theme$="[[confirmTheme]]" on-click="_confirm" aria-describedby="message">
+              <vaadin-button id="confirm" theme$="[[confirmTheme]]" on-click="doConfirm" aria-describedby="message">
                 [[confirmText]]
               </vaadin-button>
             </slot>
@@ -193,7 +190,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
              */
             rejectTheme: {
               type: String,
-              value: 'error tertiary'
+              value: 'error primary'
             },
             /**
              * Whether to show cancel button or not.
@@ -221,10 +218,18 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
             _confirmButton: {
               type: Element
             },
+            /**
+             * Whether or not the selected choice [confirm|reject] should be remembered and automatically applied next time.
+             */
             remember: {
               type: Boolean,
               value: false
             },
+            /**
+             * Enables the functionality that allows the user to choose wheter their choice [confirm|reject] should be
+             * remembered and automatically applied next time. A unique identifier for this particular dialog / question
+             * must be provided, so that only relevant choices are affected.
+             */
             rememberId: {
               type: String
             },
@@ -236,6 +241,9 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
               type: Boolean,
               computed: '_canRemember()'
             },
+            /**
+             * Text displayed for the "remember choice" checkbox.
+             */
             rememberText: {
               type: String,
               value: 'Don\'t ask me again'
@@ -260,11 +268,11 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
         _recall() {
           if (this.rememberId) {
             var choice = localStorage.getItem(this._rememberIdPrefix + this.rememberId);
-            if (!choice) return false;
+            if (!choice) return null;
             switch (choice) {
-              case '_confirm':
-              case '_reject':
-                this[choice].apply(this);
+              case 'Confirm':
+              case 'Reject':
+                this['do'+choice].apply(this);
                 return choice;
               default:
                 console.warn("Invalid choice " + choice + " for dialog " + this.rememberId);
@@ -307,7 +315,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
 
         _escPressed(event) {
           if (!event.defaultPrevented) {
-            this._cancel();
+            this.doCancel();
           }
         }
 
@@ -315,8 +323,8 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
          * @event confirm
          * fired when Confirm button was pressed.
          */
-        _confirm() {
-          this._remember('_confirm');
+        doConfirm() {
+          this._remember('Confirm');
           this.dispatchEvent(new CustomEvent('confirm'));
           this.opened = false;
         }
@@ -325,7 +333,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
          * @event cancel
          * fired when Cancel button or Escape key was pressed.
          */
-        _cancel() {
+        doCancel() {
           this.dispatchEvent(new CustomEvent('cancel'));
           this.opened = false;
         }
@@ -334,8 +342,8 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
          * @event reject
          * fired when Reject button was pressed.
          */
-        _reject() {
-          this._remember('_reject');
+        doReject() {
+          this._remember('Reject');
           this.dispatchEvent(new CustomEvent('reject'));
           this.opened = false;
         }
