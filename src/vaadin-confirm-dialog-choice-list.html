@@ -23,9 +23,9 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
           }
           *[hidden] { display: none; }
         </style>
-      <table hidden$="{{empty}}">
+      <table hidden$="{{_empty}}">
         <tbody>
-          <template is="dom-repeat" items="{{items}}">
+          <template is="dom-repeat" items="{{_items}}">
               <tr>
                   <td>{{item.title}}</td>
                   <td>{{item.description}}</td>
@@ -35,7 +35,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
           </template>
         </tbody>
       </table>
-    <div hidden$="{{!empty}}"><slot>-</slot></div>
+    <div hidden$="{{!_empty}}"><slot>-</slot></div>
   </template>
 
 
@@ -75,26 +75,35 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
               type: String,
               value: 'vaadin.vaadin-confirm-dialog.choice.'
             },
+            /**
+             * JSON allowing to specify texts for title, description, and the reject/confirm choices.
+             */
             descriptions: {
               type: Object,
               value: {},
               observer: 'refresh'
             }, 
-            items: {
-              type: Array,
-              value: []
-            },
-            empty: {
-              type: Boolean,
-              computed: '_isEmpty(items)'
-            },
+            /**
+             * Text for the button used to forget the remembered choice ("Reset").
+             */
             forgetButtonText: {
               type: String,
               value: 'Reset'
             },
+            /**
+             * Theme variant used for the "forget button" ("tertiary").
+             */
             forgetButtonTheme: {
               type: String,
               value: 'tertiary'
+            },
+            _items: {
+              type: Array,
+              value: []
+            },
+            _empty: {
+              type: Boolean,
+              computed: '_isEmpty(_items)'
             }
           };
         }
@@ -136,7 +145,7 @@ See <a href="https://vaadin.com/license/cval-3">the website</a> for the complete
               choices.push(item);
             }
           }
-          this.items = choices;
+          this._items = choices;
         }
         forget(e) {
           localStorage.removeItem(this._rememberIdPrefix + e.model.item.rememberId);
